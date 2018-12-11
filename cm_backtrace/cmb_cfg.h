@@ -29,18 +29,23 @@
 #ifndef _CMB_CFG_H_
 #define _CMB_CFG_H_
 
-/* print line, must config by user */
-#define cmb_println(...)               /* e.g., printf(__VA_ARGS__);printf("\r\n") */
-/* enable bare metal(no OS) platform */
-/* #define CMB_USING_BARE_METAL_PLATFORM */
-/* enable OS platform */
-/* #define CMB_USING_OS_PLATFORM */
-/* OS platform type, must config when CMB_USING_OS_PLATFORM is enable */
-/* #define CMB_OS_PLATFORM_TYPE           CMB_OS_PLATFORM_RTT or CMB_OS_PLATFORM_UCOSII or CMB_OS_PLATFORM_UCOSIII or CMB_OS_PLATFORM_FREERTOS */
+/* print string, must config by user */
+/* #define cmb_print(...)               e.g., printf(__VA_ARGS__); */
+   #define cmb_print(...)               printk(__VA_ARGS__);
+extern int printk(const char *fmt, ...);
+
+/* OS platform type, must config by user */
+/* #define CMB_OS_PLATFORM_TYPE         CMB_OS_PLATFORM_RTT or CMB_OS_PLATFORM_UCOSII or CMB_OS_PLATFORM_UCOSIII or CMB_OS_PLATFORM_FREERTOS or CMB_OS_PLATFORM_RTX5 */
+   #define CMB_OS_PLATFORM_TYPE         CMB_OS_PLATFORM_RTX5
+
 /* cpu platform type, must config by user */
-#define CMB_CPU_PLATFORM_TYPE          /* CMB_CPU_ARM_CORTEX_M0 or CMB_CPU_ARM_CORTEX_M3 or CMB_CPU_ARM_CORTEX_M4 or CMB_CPU_ARM_CORTEX_M7 */
+/* #define CMB_CPU_PLATFORM_TYPE        CMB_CPU_ARM_CORTEX_M0 or CMB_CPU_ARM_CORTEX_M3 or CMB_CPU_ARM_CORTEX_M4 or CMB_CPU_ARM_CORTEX_M7 */
+   #define CMB_CPU_PLATFORM_TYPE        CMB_CPU_ARM_CORTEX_M4
+
 /* enable dump stack information */
-/* #define CMB_USING_DUMP_STACK_INFO */
+/* #define CMB_USING_DUMP_STACK_INFO    CMB_ENABLE(default) or CMB_DISABLE */
+
 /* language of print information */
-/* #define CMB_PRINT_LANGUAGE             CMB_PRINT_LANGUAGE_ENGLISH(default) or CMB_PRINT_LANGUAGE_CHINESE */
+/* #define CMB_PRINT_LANGUAGE           CMB_PRINT_LANGUAGE_ENGLISH(default) or CMB_PRINT_LANGUAGE_CHINESE */
+
 #endif /* _CMB_CFG_H_ */

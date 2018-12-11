@@ -29,29 +29,24 @@
 #ifndef _CMB_DEF_H_
 #define _CMB_DEF_H_
 
-#include <cmb_cfg.h>
-#include <stdint.h>
-#include <stdlib.h>
+/*******************************************************************************
+*
+*       Configure
+*/
+#ifndef cmb_print
+    #error "cmb_print isn't defined in 'cmb_cfg.h'"
+#endif
 
-/* library software version number */
-#define CMB_SW_VERSION                "1.2.1"
+#ifndef CMB_CPU_PLATFORM_TYPE
+    #error "CMB_CPU_PLATFORM_TYPE isn't defined in 'cmb_cfg.h'"
+#endif
 
-#define CMB_CPU_ARM_CORTEX_M0          0
-#define CMB_CPU_ARM_CORTEX_M3          1
-#define CMB_CPU_ARM_CORTEX_M4          2
-#define CMB_CPU_ARM_CORTEX_M7          3
+#ifndef CMB_OS_PLATFORM_TYPE
+    #error "CMB_OS_PLATFORM_TYPE isn't defined in 'cmb_cfg.h'"
+#endif
 
-#define CMB_OS_PLATFORM_RTT            0
-#define CMB_OS_PLATFORM_UCOSII         1
-#define CMB_OS_PLATFORM_UCOSIII        2
-#define CMB_OS_PLATFORM_FREERTOS       3
-
-#define CMB_PRINT_LANGUAGE_ENGLISH     0
-#define CMB_PRINT_LANGUAGE_CHINESE     1
-
-/* name max length, default size: 32 */
-#ifndef CMB_NAME_MAX
-#define CMB_NAME_MAX                   32
+#ifndef CMB_USING_DUMP_STACK_INFO
+#define CMB_USING_DUMP_STACK_INFO      CMB_ENABLE
 #endif
 
 /* print information language, default is English */
@@ -59,6 +54,41 @@
 #define CMB_PRINT_LANGUAGE             CMB_PRINT_LANGUAGE_ENGLISH
 #endif
 
+/* supported function call stack max depth, default is 16 */
+#ifndef CMB_CALL_STACK_MAX_DEPTH
+#define CMB_CALL_STACK_MAX_DEPTH       16
+#endif
+
+/* name max length, default size: 32 */
+#ifndef CMB_NAME_MAX
+#define CMB_NAME_MAX                   32
+#endif
+
+#ifndef CMB_NEW_LINE
+#define CMB_NEW_LINE                   "\n"
+#endif
+/******************************************************************************/
+
+/* library software version number */
+#define CMB_SW_VERSION                "1.2.1"
+
+#define CMB_DISABLE                    0
+#define CMB_ENABLE                     1
+
+#define CMB_CPU_ARM_CORTEX_M0          0
+#define CMB_CPU_ARM_CORTEX_M3          1
+#define CMB_CPU_ARM_CORTEX_M4          2
+#define CMB_CPU_ARM_CORTEX_M7          3
+
+#define CMB_OS_PLATFORM_NONE           0
+#define CMB_OS_PLATFORM_RTT            1
+#define CMB_OS_PLATFORM_UCOSII         2
+#define CMB_OS_PLATFORM_UCOSIII        3
+#define CMB_OS_PLATFORM_FREERTOS       4
+#define CMB_OS_PLATFORM_RTX5           5
+
+#define CMB_PRINT_LANGUAGE_ENGLISH     0
+#define CMB_PRINT_LANGUAGE_CHINESE     1
 
 #if defined(__CC_ARM)
     /* C stack block name, default is STACK */
@@ -97,11 +127,6 @@
     #endif
 #else
     #error "not supported compiler"
-#endif
-
-/* supported function call stack max depth, default is 16 */
-#ifndef CMB_CALL_STACK_MAX_DEPTH
-#define CMB_CALL_STACK_MAX_DEPTH       16
 #endif
 
 /* system handler control and state register */
@@ -266,7 +291,7 @@ struct cmb_hard_fault_regs{
 #define CMB_ASSERT(EXPR)                                                       \
 if (!(EXPR))                                                                   \
 {                                                                              \
-    cmb_println("(%s) has assert failed at %s.", #EXPR, __FUNCTION__);         \
+    cmb_print(CMB_NEW_LINE"*** Assert failed: %s, %s, %d."CMB_NEW_LINE, #EXPR, __FILE__, __LINE__);\
     while (1);                                                                 \
 }
 
@@ -281,35 +306,22 @@ if (!(EXPR))                                                                   \
     #error "not supported compiler"
 #endif
 
-#ifndef cmb_println
-    #error "cmb_println isn't defined in 'cmb_cfg.h'"
-#endif
-
-#ifndef CMB_CPU_PLATFORM_TYPE
-    #error "CMB_CPU_PLATFORM_TYPE isn't defined in 'cmb_cfg.h'"
-#endif
-
-#if (defined(CMB_USING_BARE_METAL_PLATFORM) && defined(CMB_USING_OS_PLATFORM))
-    #error "CMB_USING_BARE_METAL_PLATFORM and CMB_USING_OS_PLATFORM only one of them can be used"
-#elif defined(CMB_USING_OS_PLATFORM)
-    #if !defined(CMB_OS_PLATFORM_TYPE)
-        #error "CMB_OS_PLATFORM_TYPE isn't defined in 'cmb_cfg.h'"
-    #endif /* !defined(CMB_OS_PLATFORM_TYPE) */
-    #if (CMB_OS_PLATFORM_TYPE == CMB_OS_PLATFORM_RTT)
-        #include <rtthread.h>
-    #elif (CMB_OS_PLATFORM_TYPE == CMB_OS_PLATFORM_UCOSII)
-        #include <ucos_ii.h>
-    #elif (CMB_OS_PLATFORM_TYPE == CMB_OS_PLATFORM_UCOSIII)
-        #include <os.h>
-    #elif (CMB_OS_PLATFORM_TYPE == CMB_OS_PLATFORM_FREERTOS)
-        #include <FreeRTOS.h>  
-        extern uint32_t *vTaskStackAddr(void);/* need to modify the FreeRTOS/tasks source code */
-        extern uint32_t vTaskStackSize(void);
-        extern char * vTaskName(void);
-    #else
-        #error "not supported OS type"
-    #endif /* (CMB_OS_PLATFORM_TYPE == CMB_OS_PLATFORM_RTT) */
-#endif /* (defined(CMB_USING_BARE_METAL_PLATFORM) && defined(CMB_USING_OS_PLATFORM)) */
+#if   (CMB_OS_PLATFORM_TYPE == CMB_OS_PLATFORM_RTT)
+    #include <rtthread.h>
+#elif (CMB_OS_PLATFORM_TYPE == CMB_OS_PLATFORM_UCOSII)
+    #include <ucos_ii.h>
+#elif (CMB_OS_PLATFORM_TYPE == CMB_OS_PLATFORM_UCOSIII)
+    #include <os.h>
+#elif (CMB_OS_PLATFORM_TYPE == CMB_OS_PLATFORM_FREERTOS)
+    #include <FreeRTOS.h>
+    extern uint32_t *vTaskStackAddr(void);/* need to modify the FreeRTOS/tasks source code */
+    extern uint32_t vTaskStackSize(void);
+    extern char * vTaskName(void);
+#elif (CMB_OS_PLATFORM_TYPE == CMB_OS_PLATFORM_RTX5)
+    #include <rtx_os.h>
+#else
+    #error "not supported OS type"
+#endif /* (CMB_OS_PLATFORM_TYPE == CMB_OS_PLATFORM_RTT) */
 
 /* include or export for supported cmb_get_msp, cmb_get_psp and cmb_get_sp function */
 #if defined(__CC_ARM)
