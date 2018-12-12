@@ -45,6 +45,12 @@
     #error "CMB_OS_PLATFORM_TYPE isn't defined in 'cmb_cfg.h'"
 #endif
 
+/* Character of new-line, "\n" or "\r\n" or "\r" */
+#ifndef CMB_NEW_LINE
+#define CMB_NEW_LINE                   "\n"
+#endif
+
+/* Whether to use the the Dump stack */
 #ifndef CMB_USING_DUMP_STACK_INFO
 #define CMB_USING_DUMP_STACK_INFO      CMB_ENABLE
 #endif
@@ -62,10 +68,6 @@
 /* name max length, default size: 32 */
 #ifndef CMB_NAME_MAX
 #define CMB_NAME_MAX                   32
-#endif
-
-#ifndef CMB_NEW_LINE
-#define CMB_NEW_LINE                   "\n"
 #endif
 /******************************************************************************/
 
