@@ -108,8 +108,8 @@ enum {
 static const char * const print_info[] = {
 #if (CMB_PRINT_LANGUAGE == CMB_PRINT_LANGUAGE_ENGLISH)
         [PRINT_FIRMWARE_INFO]         = CMB_NEW_LINE"Firmware name: %s, hardware version: %s, software version: %s"CMB_NEW_LINE,
-        [PRINT_ASSERT_ON_THREAD]      = CMB_NEW_LINE"*** Assert on thread %s: %s, %s, %d"CMB_NEW_LINE,
-        [PRINT_ASSERT_ON_HANDLER]     = CMB_NEW_LINE"*** Assert on interrupt or bare-metal(no OS): %s, %s, %d"CMB_NEW_LINE,
+        [PRINT_ASSERT_ON_THREAD]      = CMB_NEW_LINE"*** Assert on thread %s: %s, %s, %u"CMB_NEW_LINE,
+        [PRINT_ASSERT_ON_HANDLER]     = CMB_NEW_LINE"*** Assert on interrupt or bare-metal(no OS): %s, %s, %u"CMB_NEW_LINE,
         [PRINT_THREAD_STACK_INFO]     = "===== Thread stack information ====="CMB_NEW_LINE,
         [PRINT_MAIN_STACK_INFO]       = "====== Main stack information ======"CMB_NEW_LINE,
         [PRINT_THREAD_STACK_OVERFLOW] = "Error: Thread stack(%08x) was overflow"CMB_NEW_LINE,
@@ -146,8 +146,8 @@ static const char * const print_info[] = {
         [PRINT_BFAR]                  = "The bus fault occurred address is %08x"CMB_NEW_LINE,
 #elif (CMB_PRINT_LANGUAGE == CMB_PRINT_LANGUAGE_CHINESE)
         [PRINT_FIRMWARE_INFO]         = CMB_NEW_LINE"固件名称：%s，硬件版本号：%s，软件版本号：%s"CMB_NEW_LINE,
-        [PRINT_ASSERT_ON_THREAD]      = CMB_NEW_LINE"*** 在线程(%s)中发生断言: %s, %s, %d"CMB_NEW_LINE,
-        [PRINT_ASSERT_ON_HANDLER]     = CMB_NEW_LINE"*** 在中断或裸机环境下发生断言: %s, %s, %d"CMB_NEW_LINE,
+        [PRINT_ASSERT_ON_THREAD]      = CMB_NEW_LINE"*** 在线程(%s)中发生断言: %s, %s, %u"CMB_NEW_LINE,
+        [PRINT_ASSERT_ON_HANDLER]     = CMB_NEW_LINE"*** 在中断或裸机环境下发生断言: %s, %s, %u"CMB_NEW_LINE,
         [PRINT_THREAD_STACK_INFO]     = "=========== 线程堆栈信息 ==========="CMB_NEW_LINE,
         [PRINT_MAIN_STACK_INFO]       = "============ 主堆栈信息 ============"CMB_NEW_LINE,
         [PRINT_THREAD_STACK_OVERFLOW] = "错误：线程栈(%08x)发生溢出"CMB_NEW_LINE,
@@ -442,7 +442,7 @@ static void print_call_stack(uint32_t sp) {
     cur_depth = cm_backtrace_call_stack(call_stack_buf, CMB_CALL_STACK_MAX_DEPTH, sp);
 
     for (i = 0; i < cur_depth; i++) {
-        sprintf(call_stack_info + i * (8 + 1), "%08lx", call_stack_buf[i]);
+        sprintf(call_stack_info + i * (8 + 1), "%08lx", (unsigned long)call_stack_buf[i]);
         call_stack_info[i * (8 + 1) + 8] = ' ';
     }
 
@@ -462,7 +462,7 @@ static void print_call_stack(uint32_t sp) {
  * @param line  line number of assert
  * @param sp the stack pointer when on assert occurred
  */
-void cm_backtrace_assert(const char *expr, const char *file, size_t line) {
+void cm_backtrace_assert(const char *expr, const char *file, unsigned line) {
 #if CMB_USING_DUMP_STACK_INFO
     uint32_t  stack_start_addr;
     size_t    stack_size;

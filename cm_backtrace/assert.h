@@ -12,32 +12,41 @@
  */
 
 /*
- * Note that <assert.h> may be included more that once in a program with
+ * Note that "assert.h" may be included more that once in a program with
  * different setting of NDEBUG. Hence the slightly unusual first-time
  * only flag.
  */
 
-#include "stdlib.h"
-
-extern void cm_backtrace_assert(const char *expr, const char *file, size_t line);
-
 #ifndef __assert_h
-#   define __assert_h
-#   ifdef __cplusplus
-        namespace std {
-#           define __CLIBNS ::std::
-            extern "C" {
-#   else
-#       define __CLIBNS
-#   endif  /* __cplusplus */
-#   ifdef __cplusplus
-            }  /* extern "C" */
-        }  /* namespace std */
-#   endif
-#   ifdef NDEBUG
-#       define assert(e)  ((void)0)
-#   else
-#       define assert(e)  ((e) ? (void)0 : (__CLIBNS cm_backtrace_assert(#e, __FILE__, __LINE__), __CLIBNS abort()))
-#   endif
+#define __assert_h
+
+#undef  __CLIBNS
+#ifdef  __cplusplus
+#define __CLIBNS ::std::
+#else
+#define __CLIBNS
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+extern void abort(void);
+extern void cm_backtrace_assert(const char *expr, const char *file, unsigned line);
+
+#ifdef __cplusplus
+}   /* extern "C" */
+#endif
+
+#else   /* __assert_h */
+#undef assert
+#endif  /* __assert_h */
+
+
+#ifdef NDEBUG
+#define assert(e)  ((void)0)
+#else
+#define assert(e)  ((e) ? (void)0 : (void)(cm_backtrace_assert(#e, __FILE__, __LINE__), __CLIBNS abort()))
+#endif
+
+/* end of assert.h */
