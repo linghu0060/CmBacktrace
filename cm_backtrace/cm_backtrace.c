@@ -108,7 +108,7 @@ enum {
 static const char * const print_info[] = {
 #if (CMB_PRINT_LANGUAGE == CMB_PRINT_LANGUAGE_ENGLISH)
         [PRINT_FIRMWARE_INFO]         = CMB_NEW_LINE"Firmware name: %s, hardware version: %s, software version: %s"CMB_NEW_LINE,
-        [PRINT_ASSERT_ON_THREAD]      = CMB_NEW_LINE"*** Assert on thread %s: %s, %s, %u"CMB_NEW_LINE,
+        [PRINT_ASSERT_ON_THREAD]      = CMB_NEW_LINE"*** Assert on thread \"%s\": %s, %s, %u"CMB_NEW_LINE,
         [PRINT_ASSERT_ON_HANDLER]     = CMB_NEW_LINE"*** Assert on interrupt or bare-metal(no OS): %s, %s, %u"CMB_NEW_LINE,
         [PRINT_THREAD_STACK_INFO]     = "===== Thread stack information ====="CMB_NEW_LINE,
         [PRINT_MAIN_STACK_INFO]       = "====== Main stack information ======"CMB_NEW_LINE,
@@ -116,7 +116,7 @@ static const char * const print_info[] = {
         [PRINT_MAIN_STACK_OVERFLOW]   = "Error: Main stack(%08x) was overflow"CMB_NEW_LINE,
         [PRINT_CALL_STACK_INFO]       = "Show more call stack info by run: addr2line -e %s%s -s -f %.*s"CMB_NEW_LINE,
         [PRINT_CALL_STACK_ERR]        = "Dump call stack has an error"CMB_NEW_LINE,
-        [PRINT_FAULT_ON_THREAD]       = CMB_NEW_LINE"*** Fault on thread %s"CMB_NEW_LINE,
+        [PRINT_FAULT_ON_THREAD]       = CMB_NEW_LINE"*** Fault on thread \"%s\""CMB_NEW_LINE,
         [PRINT_FAULT_ON_HANDLER]      = CMB_NEW_LINE"*** Fault on interrupt or bare metal(no OS)"CMB_NEW_LINE,
         [PRINT_REGS_TITLE]            = "=================== Registers information ===================="CMB_NEW_LINE,
         [PRINT_HFSR_VECTBL]           = "Hard fault is caused by failed vector fetch"CMB_NEW_LINE,
@@ -146,7 +146,7 @@ static const char * const print_info[] = {
         [PRINT_BFAR]                  = "The bus fault occurred address is %08x"CMB_NEW_LINE,
 #elif (CMB_PRINT_LANGUAGE == CMB_PRINT_LANGUAGE_CHINESE)
         [PRINT_FIRMWARE_INFO]         = CMB_NEW_LINE"固件名称：%s，硬件版本号：%s，软件版本号：%s"CMB_NEW_LINE,
-        [PRINT_ASSERT_ON_THREAD]      = CMB_NEW_LINE"*** 在线程(%s)中发生断言: %s, %s, %u"CMB_NEW_LINE,
+        [PRINT_ASSERT_ON_THREAD]      = CMB_NEW_LINE"*** 在线程 \"%s\" 中发生断言: %s, %s, %u"CMB_NEW_LINE,
         [PRINT_ASSERT_ON_HANDLER]     = CMB_NEW_LINE"*** 在中断或裸机环境下发生断言: %s, %s, %u"CMB_NEW_LINE,
         [PRINT_THREAD_STACK_INFO]     = "=========== 线程堆栈信息 ==========="CMB_NEW_LINE,
         [PRINT_MAIN_STACK_INFO]       = "============ 主堆栈信息 ============"CMB_NEW_LINE,
@@ -154,7 +154,7 @@ static const char * const print_info[] = {
         [PRINT_MAIN_STACK_OVERFLOW]   = "错误：主栈(%08x)发生溢出"CMB_NEW_LINE,
         [PRINT_CALL_STACK_INFO]       = "查看更多函数调用栈信息，请运行：addr2line -e %s%s -s -f %.*s"CMB_NEW_LINE,
         [PRINT_CALL_STACK_ERR]        = "获取函数调用栈失败"CMB_NEW_LINE,
-        [PRINT_FAULT_ON_THREAD]       = CMB_NEW_LINE"*** 在线程(%s)中发生错误异常"CMB_NEW_LINE,
+        [PRINT_FAULT_ON_THREAD]       = CMB_NEW_LINE"*** 在线程 \"%s\" 中发生错误异常"CMB_NEW_LINE,
         [PRINT_FAULT_ON_HANDLER]      = CMB_NEW_LINE"*** 在中断或裸机环境下发生错误异常"CMB_NEW_LINE,
         [PRINT_REGS_TITLE]            = "========================= 寄存器信息 ========================="CMB_NEW_LINE,
         [PRINT_HFSR_VECTBL]           = "发生硬错误，原因：取中断向量时出错"CMB_NEW_LINE,
@@ -195,7 +195,7 @@ static size_t    main_stack_size = 0;
 static uint32_t  code_start_addr = 0;
 static size_t    code_size = 0;
 static bool      init_ok = false;
-
+static bool      on_assert = false;
 static bool      on_fault = false;
 static bool      stack_is_overflow = false;
 static bool      on_thread_before_fault = false;
@@ -473,6 +473,10 @@ void cm_backtrace_assert(const char *expr, const char *file, unsigned line) {
         assert_stack_size -= stack_pointer;
         return;
     }
+    if (on_assert) {
+        return;
+    }
+    on_assert = true;
     CMB_ASSERT(!on_fault);
     CMB_ASSERT(expr);
     CMB_ASSERT(file);
@@ -631,6 +635,9 @@ void cm_backtrace_fault(uint32_t fault_handler_lr, uint32_t fault_handler_sp) {
     size_t stack_size = main_stack_size;
 #endif
 
+    if (on_assert) {
+        return;
+    }
     CMB_ASSERT(init_ok);
     /* only call once */
     CMB_ASSERT(!on_fault);
