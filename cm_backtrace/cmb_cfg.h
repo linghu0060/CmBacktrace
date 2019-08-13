@@ -35,8 +35,8 @@
 extern int printk(const char *fmt, ...);
 
 /* Character of new-line, "\n" or "\r\n" or "\r" */
-// #define CMB_NEW_LINE                 "\n"
-   #define CMB_NEW_LINE                 "\r\n"
+   #define CMB_NEW_LINE                 "\n"
+// #define CMB_NEW_LINE                 "\r\n"
 
 /* OS platform type, must config by user */
 // #define CMB_OS_PLATFORM_TYPE         CMB_OS_PLATFORM_RTT or CMB_OS_PLATFORM_UCOSII or CMB_OS_PLATFORM_UCOSIII or CMB_OS_PLATFORM_FREERTOS or CMB_OS_PLATFORM_RTX5
@@ -44,7 +44,6 @@ extern int printk(const char *fmt, ...);
 
 /* cpu platform type, must config by user */
 // #define CMB_CPU_PLATFORM_TYPE        CMB_CPU_ARM_CORTEX_M0 or CMB_CPU_ARM_CORTEX_M3 or CMB_CPU_ARM_CORTEX_M4 or CMB_CPU_ARM_CORTEX_M7
-   #define CMB_CPU_PLATFORM_TYPE        CMB_CPU_ARM_CORTEX_M4
 
 /* enable dump stack information */
 // #define CMB_USING_DUMP_STACK_INFO    CMB_ENABLE(default) or CMB_DISABLE

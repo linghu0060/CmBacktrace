@@ -66,7 +66,6 @@
 #endif
 
 enum {
-    PRINT_FIRMWARE_INFO,
     PRINT_ASSERT_ON_THREAD,
     PRINT_ASSERT_ON_HANDLER,
     PRINT_THREAD_STACK_INFO,
@@ -107,14 +106,13 @@ enum {
 
 static const char * const print_info[] = {
 #if (CMB_PRINT_LANGUAGE == CMB_PRINT_LANGUAGE_ENGLISH)
-        [PRINT_FIRMWARE_INFO]         = CMB_NEW_LINE"Firmware name: %s, hardware version: %s, software version: %s"CMB_NEW_LINE,
         [PRINT_ASSERT_ON_THREAD]      = CMB_NEW_LINE"*** Assert on thread \"%s\": %s, %s, %u"CMB_NEW_LINE,
         [PRINT_ASSERT_ON_HANDLER]     = CMB_NEW_LINE"*** Assert on interrupt or bare-metal(no OS): %s, %s, %u"CMB_NEW_LINE,
         [PRINT_THREAD_STACK_INFO]     = "===== Thread stack information ====="CMB_NEW_LINE,
         [PRINT_MAIN_STACK_INFO]       = "====== Main stack information ======"CMB_NEW_LINE,
         [PRINT_THREAD_STACK_OVERFLOW] = "Error: Thread stack(%08x) was overflow"CMB_NEW_LINE,
         [PRINT_MAIN_STACK_OVERFLOW]   = "Error: Main stack(%08x) was overflow"CMB_NEW_LINE,
-        [PRINT_CALL_STACK_INFO]       = "Show more call stack info by run: addr2line -e %s%s -s -f %.*s"CMB_NEW_LINE,
+        [PRINT_CALL_STACK_INFO]       = "Show more call stack info by run: addr2line -e NAME%s -s -f %.*s"CMB_NEW_LINE,
         [PRINT_CALL_STACK_ERR]        = "Dump call stack has an error"CMB_NEW_LINE,
         [PRINT_FAULT_ON_THREAD]       = CMB_NEW_LINE"*** Fault on thread \"%s\""CMB_NEW_LINE,
         [PRINT_FAULT_ON_HANDLER]      = CMB_NEW_LINE"*** Fault on interrupt or bare metal(no OS)"CMB_NEW_LINE,
@@ -145,14 +143,13 @@ static const char * const print_info[] = {
         [PRINT_MMAR]                  = "The memory management fault occurred address is %08x"CMB_NEW_LINE,
         [PRINT_BFAR]                  = "The bus fault occurred address is %08x"CMB_NEW_LINE,
 #elif (CMB_PRINT_LANGUAGE == CMB_PRINT_LANGUAGE_CHINESE)
-        [PRINT_FIRMWARE_INFO]         = CMB_NEW_LINE"固件名称：%s，硬件版本号：%s，软件版本号：%s"CMB_NEW_LINE,
         [PRINT_ASSERT_ON_THREAD]      = CMB_NEW_LINE"*** 在线程 \"%s\" 中发生断言: %s, %s, %u"CMB_NEW_LINE,
         [PRINT_ASSERT_ON_HANDLER]     = CMB_NEW_LINE"*** 在中断或裸机环境下发生断言: %s, %s, %u"CMB_NEW_LINE,
         [PRINT_THREAD_STACK_INFO]     = "=========== 线程堆栈信息 ==========="CMB_NEW_LINE,
         [PRINT_MAIN_STACK_INFO]       = "============ 主堆栈信息 ============"CMB_NEW_LINE,
         [PRINT_THREAD_STACK_OVERFLOW] = "错误：线程栈(%08x)发生溢出"CMB_NEW_LINE,
         [PRINT_MAIN_STACK_OVERFLOW]   = "错误：主栈(%08x)发生溢出"CMB_NEW_LINE,
-        [PRINT_CALL_STACK_INFO]       = "查看更多函数调用栈信息，请运行：addr2line -e %s%s -s -f %.*s"CMB_NEW_LINE,
+        [PRINT_CALL_STACK_INFO]       = "查看更多函数调用栈信息，请运行：addr2line -e NAME%s -s -f %.*s"CMB_NEW_LINE,
         [PRINT_CALL_STACK_ERR]        = "获取函数调用栈失败"CMB_NEW_LINE,
         [PRINT_FAULT_ON_THREAD]       = CMB_NEW_LINE"*** 在线程 \"%s\" 中发生错误异常"CMB_NEW_LINE,
         [PRINT_FAULT_ON_HANDLER]      = CMB_NEW_LINE"*** 在中断或裸机环境下发生错误异常"CMB_NEW_LINE,
@@ -187,9 +184,6 @@ static const char * const print_info[] = {
 #endif
 };
 
-static char      fw_name[CMB_NAME_MAX] = {0};
-static char      hw_ver[CMB_NAME_MAX] = {0};
-static char      sw_ver[CMB_NAME_MAX] = {0};
 static uint32_t  main_stack_start_addr = 0;
 static size_t    main_stack_size = 0;
 static uint32_t  code_start_addr = 0;
@@ -209,11 +203,7 @@ static struct cmb_hard_fault_regs   regs;
 /**
  * library initialize
  */
-void cm_backtrace_init(const char *firmware_name, const char *hardware_ver, const char *software_ver) {
-    strncpy(fw_name, firmware_name, CMB_NAME_MAX);
-    strncpy(hw_ver, hardware_ver, CMB_NAME_MAX);
-    strncpy(sw_ver, software_ver, CMB_NAME_MAX);
-
+void cm_backtrace_init(void) {
 #if defined(__CC_ARM)
     main_stack_start_addr = (uint32_t)&CSTACK_BLOCK_START(CMB_CSTACK_BLOCK_NAME);
     main_stack_size = (uint32_t)&CSTACK_BLOCK_END(CMB_CSTACK_BLOCK_NAME) - main_stack_start_addr;
@@ -237,14 +227,6 @@ void cm_backtrace_init(const char *firmware_name, const char *hardware_ver, cons
     cm_backtrace_assert("", "", 0);
 
     init_ok = true;
-}
-
-/**
- * print firmware information, such as: firmware name, hardware version, software version
- */
-void cm_backtrace_firmware_info(void) {
-    CMB_ASSERT(init_ok);
-    cmb_print(print_info[PRINT_FIRMWARE_INFO], fw_name, hw_ver, sw_ver);
 }
 
 #if (CMB_OS_PLATFORM_TYPE > CMB_OS_PLATFORM_NONE)
@@ -447,8 +429,7 @@ static void print_call_stack(uint32_t sp) {
     }
 
     if (cur_depth) {
-        cmb_print(print_info[PRINT_CALL_STACK_INFO], fw_name, CMB_ELF_FILE_EXTENSION_NAME, cur_depth * (8 + 1),
-                call_stack_info);
+        cmb_print(print_info[PRINT_CALL_STACK_INFO], CMB_ELF_FILE_EXTENSION_NAME, cur_depth * (8 + 1), call_stack_info);
     } else {
         cmb_print(print_info[PRINT_CALL_STACK_ERR]);
     }
@@ -496,6 +477,7 @@ void cm_backtrace_assert(const char *expr, const char *file, unsigned line) {
     }
 
     print_call_stack(stack_pointer);
+    cmb_abort();
 }
 
 #if (CMB_CPU_PLATFORM_TYPE != CMB_CPU_ARM_CORTEX_M0)
@@ -641,10 +623,7 @@ void cm_backtrace_fault(uint32_t fault_handler_lr, uint32_t fault_handler_sp) {
     CMB_ASSERT(init_ok);
     /* only call once */
     CMB_ASSERT(!on_fault);
-
     on_fault = true;
-
-  //cm_backtrace_firmware_info();
 
 #if (CMB_OS_PLATFORM_TYPE > CMB_OS_PLATFORM_NONE)
     on_thread_before_fault = fault_handler_lr & (1UL << 2);
@@ -722,5 +701,6 @@ void cm_backtrace_fault(uint32_t fault_handler_lr, uint32_t fault_handler_sp) {
 #endif
 
     print_call_stack(stack_pointer);
+    cmb_abort();
 }
 

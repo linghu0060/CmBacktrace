@@ -37,10 +37,6 @@
     #error "cmb_print isn't defined in 'cmb_cfg.h'"
 #endif
 
-#ifndef CMB_CPU_PLATFORM_TYPE
-    #error "CMB_CPU_PLATFORM_TYPE isn't defined in 'cmb_cfg.h'"
-#endif
-
 #ifndef CMB_OS_PLATFORM_TYPE
     #error "CMB_OS_PLATFORM_TYPE isn't defined in 'cmb_cfg.h'"
 #endif
@@ -297,6 +293,32 @@ if (!(EXPR))                                                                   \
     while (1);                                                                 \
 }
 
+/* cpu platform type */
+#if defined(__CC_ARM)
+    #undef  CMB_CPU_PLATFORM_TYPE
+    #if     defined(__TARGET_CPU_CORTEX_M0)
+    #define CMB_CPU_PLATFORM_TYPE   CMB_CPU_ARM_CORTEX_M0
+    #elif   defined(__TARGET_CPU_CORTEX_M3)
+    #define CMB_CPU_PLATFORM_TYPE   CMB_CPU_ARM_CORTEX_M3
+    #elif   defined(__TARGET_CPU_CORTEX_M4)
+    #define CMB_CPU_PLATFORM_TYPE   CMB_CPU_ARM_CORTEX_M4
+    #elif   defined(__TARGET_CPU_CORTEX_M7)
+    #define CMB_CPU_PLATFORM_TYPE   CMB_CPU_ARM_CORTEX_M7
+    #else
+    #error "Unsupported CPU platform type"
+    #endif
+#elif defined(__ICCARM__)
+    #ifndef CMB_CPU_PLATFORM_TYPE
+    #error "CMB_CPU_PLATFORM_TYPE isn't defined in 'cmb_cfg.h'"
+    #endif
+#elif defined(__GNUC__)
+    #ifndef CMB_CPU_PLATFORM_TYPE
+    #error "CMB_CPU_PLATFORM_TYPE isn't defined in 'cmb_cfg.h'"
+    #endif
+#else
+    #error "not supported compiler"
+#endif
+
 /* ELF(Executable and Linking Format) file extension name for each compiler */
 #if defined(__CC_ARM)
     #define CMB_ELF_FILE_EXTENSION_NAME          ".axf"
@@ -339,6 +361,8 @@ if (!(EXPR))                                                                   \
         mov r0, sp
         bx lr
     }
+    #define cmb_abort()   do{ __disable_irq(); }while(1)
+//  extern void __disable_irq(void);
 #elif defined(__ICCARM__)
 /* IAR iccarm specific functions */
 /* Close Raw Asm Code Warning */  
@@ -358,6 +382,8 @@ if (!(EXPR))                                                                   \
       __asm("mov r0, sp");
       __asm("bx lr");       
     }
+    #define cmb_abort()   do{ __iar_builtin_disable_interrupt(); }while(1)
+    extern void __iar_builtin_disable_interrupt(void);
 #pragma diag_default=Pe940  
 #elif defined(__GNUC__)
     __attribute__( ( always_inline ) ) static inline uint32_t cmb_get_msp(void) {
@@ -375,6 +401,7 @@ if (!(EXPR))                                                                   \
         __asm volatile ("MOV %0, sp\n" : "=r" (result) );
         return(result);
     }
+    #define cmb_abort()   do{ __asm volatile ("cpsid i" : : : "memory"); }while(1)
 #else
     #error "not supported compiler"
 #endif

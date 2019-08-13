@@ -20,20 +20,10 @@
 #ifndef __assert_h
 #define __assert_h
 
-#undef  __CLIBNS
-#ifdef  __cplusplus
-#define __CLIBNS ::std::
-#else
-#define __CLIBNS
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-extern void abort(void);
 extern void cm_backtrace_assert(const char *expr, const char *file, unsigned line);
-
 #ifdef __cplusplus
 }   /* extern "C" */
 #endif
@@ -44,9 +34,11 @@ extern void cm_backtrace_assert(const char *expr, const char *file, unsigned lin
 
 
 #ifdef NDEBUG
-#define assert(e)  ((void)0)
+#define assert(e)           ((void)0)
+#define assert_msg(e, msg)  ((void)0)
 #else
-#define assert(e)  ((e) ? (void)0 : (void)(cm_backtrace_assert(#e, __FILE__, __LINE__), __CLIBNS abort()))
+#define assert(e)           ((e) ? (void)0 : (void)cm_backtrace_assert(#e,  __FILE__, __LINE__))
+#define assert_msg(e, msg)  ((e) ? (void)0 : (void)cm_backtrace_assert(msg, __FILE__, __LINE__))
 #endif
 
 /* end of assert.h */
