@@ -37,7 +37,6 @@ extern  "C"
 #include "stdlib.h"
 
 void cm_backtrace_init(void);
-void cm_backtrace_firmware_info(void);
 size_t cm_backtrace_call_stack(uint32_t *buffer, size_t size, uint32_t sp);
 
 void cm_backtrace_assert(const char *expr, const char *file, unsigned line);
