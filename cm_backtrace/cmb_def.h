@@ -41,11 +41,6 @@
     #error "CMB_OS_PLATFORM_TYPE isn't defined in 'cmb_cfg.h'"
 #endif
 
-/* Character of new-line, "\n" or "\r\n" or "\r" */
-#ifndef CMB_NEW_LINE
-#define CMB_NEW_LINE                   "\n"
-#endif
-
 /* Whether to use the the Dump stack */
 #ifndef CMB_USING_DUMP_STACK_INFO
 #define CMB_USING_DUMP_STACK_INFO      CMB_ENABLE
@@ -285,12 +280,15 @@ struct cmb_hard_fault_regs{
   unsigned int afsr;                     // Auxiliary Fault Status Register (0xE000ED3C), Vendor controlled (optional)
 };
 
+/* print string */
+#define cmb_println(...)    do{ cmb_print(__VA_ARGS__); cmb_print("\r\n"); }while(0)
+
 /* assert for developer. */
-#define CMB_ASSERT(EXPR)                                                       \
-if (!(EXPR))                                                                   \
-{                                                                              \
-    cmb_print(CMB_NEW_LINE"*** Assert failed: %s, %s, %d."CMB_NEW_LINE, #EXPR, __FILE__, __LINE__);\
-    while (1);                                                                 \
+#define CMB_ASSERT(EXPR)                                                            \
+if (!(EXPR))                                                                        \
+{                                                                                   \
+    cmb_print("\r\n*** Assert failed: %s, %s, %d.\r\n", #EXPR, __FILE__, __LINE__); \
+    while (1);                                                                      \
 }
 
 /* cpu platform type */
@@ -339,11 +337,11 @@ if (!(EXPR))                                                                   \
 #elif (CMB_OS_PLATFORM_TYPE == CMB_OS_PLATFORM_FREERTOS)
     #include <FreeRTOS.h>
     extern uint32_t *vTaskStackAddr(void);/* need to modify the FreeRTOS/tasks source code */
-    extern uint32_t vTaskStackSize(void);
-    extern char * vTaskName(void);
+    extern uint32_t  vTaskStackSize(void);
+    extern char     *vTaskName(void);
 #elif (CMB_OS_PLATFORM_TYPE == CMB_OS_PLATFORM_RTX5)
     #include <rtx_os.h>
-#else
+#elif (CMB_OS_PLATFORM_TYPE != CMB_OS_PLATFORM_NONE)
     #error "not supported OS type"
 #endif /* (CMB_OS_PLATFORM_TYPE == CMB_OS_PLATFORM_RTT) */
 

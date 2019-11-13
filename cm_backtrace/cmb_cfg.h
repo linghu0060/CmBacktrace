@@ -30,25 +30,30 @@
 #define _CMB_CFG_H_
 
 /* print string, must config by user */
-// #define cmb_print(...)               e.g., printf(__VA_ARGS__);
-   #define cmb_print(...)               printk(__VA_ARGS__);
-extern int printk(const char *fmt, ...);
-
-/* Character of new-line, "\n" or "\r\n" or "\r" */
-   #define CMB_NEW_LINE                 "\n"
-// #define CMB_NEW_LINE                 "\r\n"
+// #define cmb_print(...)               printf(__VA_ARGS__)
+   #define cmb_print(...)               printk(__VA_ARGS__)
+   extern int printk(const char *fmt, ...);
 
 /* OS platform type, must config by user */
-// #define CMB_OS_PLATFORM_TYPE         CMB_OS_PLATFORM_RTT or CMB_OS_PLATFORM_UCOSII or CMB_OS_PLATFORM_UCOSIII or CMB_OS_PLATFORM_FREERTOS or CMB_OS_PLATFORM_RTX5
+// #define CMB_OS_PLATFORM_TYPE         CMB_OS_PLATFORM_NONE
+// #define CMB_OS_PLATFORM_TYPE         CMB_OS_PLATFORM_RTT
+// #define CMB_OS_PLATFORM_TYPE         CMB_OS_PLATFORM_UCOSII
+// #define CMB_OS_PLATFORM_TYPE         CMB_OS_PLATFORM_UCOSIII
+// #define CMB_OS_PLATFORM_TYPE         CMB_OS_PLATFORM_FREERTOS
    #define CMB_OS_PLATFORM_TYPE         CMB_OS_PLATFORM_RTX5
 
-/* cpu platform type, must config by user */
-// #define CMB_CPU_PLATFORM_TYPE        CMB_CPU_ARM_CORTEX_M0 or CMB_CPU_ARM_CORTEX_M3 or CMB_CPU_ARM_CORTEX_M4 or CMB_CPU_ARM_CORTEX_M7
+/* cpu platform type */
+// #define CMB_CPU_PLATFORM_TYPE        CMB_CPU_ARM_CORTEX_M0
+// #define CMB_CPU_PLATFORM_TYPE        CMB_CPU_ARM_CORTEX_M3
+// #define CMB_CPU_PLATFORM_TYPE        CMB_CPU_ARM_CORTEX_M4
+// #define CMB_CPU_PLATFORM_TYPE        CMB_CPU_ARM_CORTEX_M7
 
 /* enable dump stack information */
-// #define CMB_USING_DUMP_STACK_INFO    CMB_ENABLE(default) or CMB_DISABLE
+// #define CMB_USING_DUMP_STACK_INFO    CMB_ENABLE                  // default
+// #define CMB_USING_DUMP_STACK_INFO    CMB_DISABLE
 
 /* language of print information */
-// #define CMB_PRINT_LANGUAGE           CMB_PRINT_LANGUAGE_ENGLISH(default) or CMB_PRINT_LANGUAGE_CHINESE
+// #define CMB_PRINT_LANGUAGE           CMB_PRINT_LANGUAGE_ENGLISH  // default
+// #define CMB_PRINT_LANGUAGE           CMB_PRINT_LANGUAGE_CHINESE
 
 #endif /* _CMB_CFG_H_ */
