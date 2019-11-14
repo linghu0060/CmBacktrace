@@ -34,7 +34,7 @@ extern  "C"
 #endif
 
 #include "stdint.h"
-#include "stdlib.h"
+#include "stdio.h"      // size_t
 
 void cm_backtrace_init(void);
 size_t cm_backtrace_call_stack(uint32_t *buffer, size_t size, uint32_t sp);

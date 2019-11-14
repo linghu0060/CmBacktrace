@@ -37,8 +37,12 @@
     #error "cmb_print isn't defined in 'cmb_cfg.h'"
 #endif
 
+#ifndef cmb_abort
+#define cmb_abort()                    ((void)0)
+#endif
+
 #ifndef CMB_OS_PLATFORM_TYPE
-    #error "CMB_OS_PLATFORM_TYPE isn't defined in 'cmb_cfg.h'"
+#define CMB_OS_PLATFORM_TYPE           CMB_OS_PLATFORM_NONE
 #endif
 
 /* Whether to use the the Dump stack */
@@ -359,8 +363,6 @@ if (!(EXPR))                                                                    
         mov r0, sp
         bx lr
     }
-    #define cmb_abort()   do{ __disable_irq(); }while(1)
-//  extern void __disable_irq(void);
 #elif defined(__ICCARM__)
 /* IAR iccarm specific functions */
 /* Close Raw Asm Code Warning */  
@@ -380,8 +382,6 @@ if (!(EXPR))                                                                    
       __asm("mov r0, sp");
       __asm("bx lr");       
     }
-    #define cmb_abort()   do{ __iar_builtin_disable_interrupt(); }while(1)
-    extern void __iar_builtin_disable_interrupt(void);
 #pragma diag_default=Pe940  
 #elif defined(__GNUC__)
     __attribute__( ( always_inline ) ) static inline uint32_t cmb_get_msp(void) {
@@ -399,7 +399,6 @@ if (!(EXPR))                                                                    
         __asm volatile ("MOV %0, sp\n" : "=r" (result) );
         return(result);
     }
-    #define cmb_abort()   do{ __asm volatile ("cpsid i" : : : "memory"); }while(1)
 #else
     #error "not supported compiler"
 #endif

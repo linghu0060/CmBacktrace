@@ -27,7 +27,7 @@
  */
 
 #include "stdint.h"
-#include "stdlib.h"
+#include "stdio.h"      // printf()
 #include "stdbool.h"
 #include "cmb_cfg.h"
 #include "cmb_def.h"
@@ -478,6 +478,7 @@ void cm_backtrace_assert(const char *expr, const char *file, unsigned line) {
 
     print_call_stack(stack_pointer);
     cmb_abort();
+    while (1) ;
 }
 
 #if (CMB_CPU_PLATFORM_TYPE != CMB_CPU_ARM_CORTEX_M0)
@@ -704,7 +705,6 @@ void cm_backtrace_fault(uint32_t fault_handler_lr, uint32_t fault_handler_sp) {
 #endif
 
     print_call_stack(stack_pointer);
-    cmb_abort();
 }
 
 
@@ -715,14 +715,22 @@ void HardFault_Handler(void)
 {
 #if defined(__CC_ARM)
 
-    register uint32_t fault_handler_lr = __return_address();  //__asm("lr");
-    register uint32_t fault_handler_sp = __current_sp();      //__asm("sp");
+//  extern void __disable_irq(void);
+    register uint32_t fault_handler_lr; //__asm("lr");
+    register uint32_t fault_handler_sp; //__asm("sp");
+
+    __disable_irq();
+    fault_handler_lr = __return_address();
+    fault_handler_sp = __current_sp();
 
 #elif defined(__ICCARM__)
 #error "not supported compiler"
 
+    extern void __iar_builtin_disable_interrupt(void);
     register uint32_t fault_handler_sp;
     register uint32_t fault_handler_lr;
+
+    __iar_builtin_disable_interrupt();
     __asm volatile("MOV  %0, sp" : "=r"  (fault_handler_sp));
     __asm volatile("MOV  %0, lr" : "=r"  (fault_handler_lr));
 
@@ -731,6 +739,8 @@ void HardFault_Handler(void)
 
     register uint32_t fault_handler_sp;
     register uint32_t fault_handler_lr;
+
+    __asm volatile("cpsid i" : : : "memory");
     __asm volatile("MOV  %0, sp" : "=r"  (fault_handler_sp));
     __asm volatile("MOV  %0, lr" : "=r"  (fault_handler_lr));
 
@@ -739,6 +749,7 @@ void HardFault_Handler(void)
 #endif
 
     cm_backtrace_fault(fault_handler_lr, fault_handler_sp);
+    cmb_abort();
     while (1) ;
 }
 
