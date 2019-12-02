@@ -186,10 +186,10 @@ static const char * const print_info[] = {
 static uint32_t  main_stack_start_addr = 0;
 static size_t    main_stack_size = 0;
 static uint32_t  code_start_addr = 0;
-static size_t    code_size = 0;
-static bool      init_ok = false;
-static bool      on_assert = false;
-static bool      on_fault = false;
+static size_t    code_size  = 0;
+       uint32_t  cm_init_ok = 0;
+static bool      on_assert  = false;
+static bool      on_fault   = false;
 static bool      stack_is_overflow = false;
 static bool      on_thread_before_fault = false;
 #if (CMB_CPU_PLATFORM_TYPE == CMB_CPU_ARM_CORTEX_M4) || (CMB_CPU_PLATFORM_TYPE == CMB_CPU_ARM_CORTEX_M7)
@@ -203,6 +203,9 @@ static struct cmb_hard_fault_regs   regs;
  * library initialize
  */
 void cm_backtrace_init(void) {
+    if (cm_init_ok == 0x55AAAA55) {
+        return;
+    }
 #if defined(__CC_ARM)
     main_stack_start_addr = (uint32_t)&CSTACK_BLOCK_START(CMB_CSTACK_BLOCK_NAME);
     main_stack_size = (uint32_t)&CSTACK_BLOCK_END(CMB_CSTACK_BLOCK_NAME) - main_stack_start_addr;
@@ -225,7 +228,14 @@ void cm_backtrace_init(void) {
     assert_stack_size = cmb_get_sp();
     cm_backtrace_assert("", "", 0);
 
-    init_ok = true;
+    cm_init_ok             =  0x55AAAA55;
+    on_assert              =  false;
+    on_fault               =  false;
+    stack_is_overflow      =  false;
+    on_thread_before_fault =  false;
+#if (CMB_CPU_PLATFORM_TYPE == CMB_CPU_ARM_CORTEX_M4) || (CMB_CPU_PLATFORM_TYPE == CMB_CPU_ARM_CORTEX_M7)
+    statck_has_fpu_regs    =  false;
+#endif
 }
 
 #if (CMB_OS_PLATFORM_TYPE > CMB_OS_PLATFORM_NONE)
@@ -352,7 +362,7 @@ size_t cm_backtrace_call_stack(uint32_t *buffer, size_t size, uint32_t sp) {
     size_t depth = 0, stack_size = main_stack_size;
     bool regs_saved_lr_is_valid = false;
 
-    CMB_ASSERT(init_ok);
+    CMB_ASSERT(cm_init_ok == 0x55AAAA55);
 
     if (on_fault) {
         if (!stack_is_overflow) {
@@ -442,7 +452,7 @@ static void print_call_stack(uint32_t sp) {
 void cm_backtrace_assert(const char *expr, const char *file, unsigned line) {
     uint32_t  stack_pointer = cmb_get_sp();
 
-    if (!init_ok) {
+    if (cm_init_ok != 0x55AAAA55) {
         assert_stack_size -= stack_pointer;
         return;
     }
@@ -621,7 +631,7 @@ void cm_backtrace_fault(uint32_t fault_handler_lr, uint32_t fault_handler_sp) {
     if (on_assert) {
         return;
     }
-    CMB_ASSERT(init_ok);
+    CMB_ASSERT(cm_init_ok == 0x55AAAA55);
     /* only call once */
     CMB_ASSERT(!on_fault);
     on_fault = true;
