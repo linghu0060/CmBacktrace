@@ -87,6 +87,10 @@
 #define CMB_PRINT_LANGUAGE_ENGLISH     0
 #define CMB_PRINT_LANGUAGE_CHINESE     1
 
+/*******************************************************************************
+*
+*        C stack block, code section
+*/
 #if defined(__CC_ARM)
     /* C stack block name, default is STACK */
     #ifndef CMB_CSTACK_BLOCK_NAME
@@ -125,6 +129,7 @@
 #else
     #error "not supported compiler"
 #endif
+/******************************************************************************/
 
 /* system handler control and state register */
 #ifndef CMB_SYSHND_CTRL
@@ -283,6 +288,7 @@ struct cmb_hard_fault_regs{
 
   unsigned int afsr;                     // Auxiliary Fault Status Register (0xE000ED3C), Vendor controlled (optional)
 };
+/******************************************************************************/
 
 /* print string */
 #define cmb_println(...)    do{ cmb_print(__VA_ARGS__); cmb_print("\r\n"); }while(0)
@@ -295,7 +301,10 @@ if (!(EXPR))                                                                    
     while (1);                                                                      \
 }
 
-/* cpu platform type */
+/*******************************************************************************
+*
+*        cpu platform type
+*/
 #if defined(__CC_ARM)
     #undef  CMB_CPU_PLATFORM_TYPE
     #if     defined(__TARGET_CPU_CORTEX_M0)
@@ -321,7 +330,10 @@ if (!(EXPR))                                                                    
     #error "not supported compiler"
 #endif
 
-/* ELF(Executable and Linking Format) file extension name for each compiler */
+/*******************************************************************************
+*
+* ELF(Executable and Linking Format) file extension name for each compiler
+*/
 #if defined(__CC_ARM)
     #define CMB_ELF_FILE_EXTENSION_NAME          ".axf"
 #elif defined(__ICCARM__)
@@ -332,24 +344,41 @@ if (!(EXPR))                                                                    
     #error "not supported compiler"
 #endif
 
+/*******************************************************************************
+*
+*   OS platform: thread name and stack information, thread exit function
+*/
 #if   (CMB_OS_PLATFORM_TYPE == CMB_OS_PLATFORM_RTT)
     #include <rtthread.h>
+    #define CMB_OS_THREAD_EXIT()    do{ on_assert = false; rt_thread_exit(); }while(0)
+
 #elif (CMB_OS_PLATFORM_TYPE == CMB_OS_PLATFORM_UCOSII)
     #include <ucos_ii.h>
+    #define CMB_OS_THREAD_EXIT()    do{ on_assert = false; OSTaskDel(OS_PRIO_SELF); }while(0)
+
 #elif (CMB_OS_PLATFORM_TYPE == CMB_OS_PLATFORM_UCOSIII)
     #include <os.h>
+    #define CMB_OS_THREAD_EXIT()    do{ OS_ERR err; on_assert = false; OSTaskDel(NULL, &err); }while(0)
+
 #elif (CMB_OS_PLATFORM_TYPE == CMB_OS_PLATFORM_FREERTOS)
     #include <FreeRTOS.h>
     extern uint32_t *vTaskStackAddr(void);/* need to modify the FreeRTOS/tasks source code */
     extern uint32_t  vTaskStackSize(void);
     extern char     *vTaskName(void);
+    #define CMB_OS_THREAD_EXIT()    do{ on_assert = false; vTaskDelete(NULL); }while(0)
+
 #elif (CMB_OS_PLATFORM_TYPE == CMB_OS_PLATFORM_RTX5)
     #include <rtx_os.h>
+    #define CMB_OS_THREAD_EXIT()    do{ on_assert = false; osThreadExit(); }while(0)
+
 #elif (CMB_OS_PLATFORM_TYPE != CMB_OS_PLATFORM_NONE)
     #error "not supported OS type"
 #endif /* (CMB_OS_PLATFORM_TYPE == CMB_OS_PLATFORM_RTT) */
 
-/* include or export for supported cmb_get_msp, cmb_get_psp and cmb_get_sp function */
+/*******************************************************************************
+*
+*   include or export for cmb_get_msp, cmb_get_psp and cmb_get_sp function
+*/
 #if defined(__CC_ARM)
     static __inline __asm uint32_t cmb_get_msp(void) {
         mrs r0, msp
@@ -402,5 +431,7 @@ if (!(EXPR))                                                                    
 #else
     #error "not supported compiler"
 #endif
+/******************************************************************************/
 
 #endif /* _CMB_DEF_H_ */
+

@@ -456,13 +456,11 @@ void cm_backtrace_assert(const char *expr, const char *file, unsigned line) {
         assert_stack_size -= stack_pointer;
         return;
     }
-    if (on_assert) {
-        return;
-    }
-    on_assert = true;
     CMB_ASSERT(!on_fault);
     CMB_ASSERT(expr);
     CMB_ASSERT(file);
+    while(on_assert);
+    on_assert = true;
 
 #if (CMB_OS_PLATFORM_TYPE > CMB_OS_PLATFORM_NONE)
     if (stack_pointer == cmb_get_psp())
@@ -485,8 +483,14 @@ void cm_backtrace_assert(const char *expr, const char *file, unsigned line) {
         dump_stack(main_stack_start_addr, main_stack_size, (uint32_t *)(stack_pointer + assert_stack_size), false);
 #endif
     }
-
     print_call_stack(stack_pointer);
+
+#if (CMB_OS_PLATFORM_TYPE > CMB_OS_PLATFORM_NONE)
+    if (stack_pointer == cmb_get_psp()) {
+        CMB_OS_THREAD_EXIT();
+    }
+#endif
+
     cmb_abort();
     while (1) ;
 }

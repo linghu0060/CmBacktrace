@@ -30,44 +30,44 @@
 #define _CMB_CFG_H_
 
 /* print string, must config by user */
-   #ifndef cmb_print
-   #define cmb_print(...)               printf(__VA_ARGS__)
-   #endif
+#  ifndef cmb_print
+#  define cmb_print(...)                printf(__VA_ARGS__)
+#  endif
 
 /* handle system abort */
-   #ifndef cmb_abort
-// #define cmb_abort()                  ((void)0)                   // default
-   #endif
+#  ifndef cmb_abort
+//#define cmb_abort()                   ((void)0)                   // default
+#  endif
 
 /* OS platform type */
-   #ifndef CMB_OS_PLATFORM_TYPE
-// #define CMB_OS_PLATFORM_TYPE         CMB_OS_PLATFORM_NONE        // default
-// #define CMB_OS_PLATFORM_TYPE         CMB_OS_PLATFORM_RTT
-// #define CMB_OS_PLATFORM_TYPE         CMB_OS_PLATFORM_UCOSII
-// #define CMB_OS_PLATFORM_TYPE         CMB_OS_PLATFORM_UCOSIII
-// #define CMB_OS_PLATFORM_TYPE         CMB_OS_PLATFORM_FREERTOS
-// #define CMB_OS_PLATFORM_TYPE         CMB_OS_PLATFORM_RTX5
-   #endif
+#  ifndef CMB_OS_PLATFORM_TYPE
+//#define CMB_OS_PLATFORM_TYPE          CMB_OS_PLATFORM_NONE        // default
+//#define CMB_OS_PLATFORM_TYPE          CMB_OS_PLATFORM_RTT
+//#define CMB_OS_PLATFORM_TYPE          CMB_OS_PLATFORM_UCOSII
+//#define CMB_OS_PLATFORM_TYPE          CMB_OS_PLATFORM_UCOSIII
+//#define CMB_OS_PLATFORM_TYPE          CMB_OS_PLATFORM_FREERTOS
+//#define CMB_OS_PLATFORM_TYPE          CMB_OS_PLATFORM_RTX5
+#  endif
 
 /* cpu platform type */
-   #ifndef CMB_CPU_PLATFORM_TYPE
-// #define CMB_CPU_PLATFORM_TYPE        CMB_CPU_ARM_CORTEX_M0
-// #define CMB_CPU_PLATFORM_TYPE        CMB_CPU_ARM_CORTEX_M3
-// #define CMB_CPU_PLATFORM_TYPE        CMB_CPU_ARM_CORTEX_M4
-// #define CMB_CPU_PLATFORM_TYPE        CMB_CPU_ARM_CORTEX_M7
-   #endif
+#  ifndef CMB_CPU_PLATFORM_TYPE
+//#define CMB_CPU_PLATFORM_TYPE         CMB_CPU_ARM_CORTEX_M0
+//#define CMB_CPU_PLATFORM_TYPE         CMB_CPU_ARM_CORTEX_M3
+//#define CMB_CPU_PLATFORM_TYPE         CMB_CPU_ARM_CORTEX_M4
+//#define CMB_CPU_PLATFORM_TYPE         CMB_CPU_ARM_CORTEX_M7
+#  endif
 
 /* enable dump stack information */
-   #ifndef CMB_USING_DUMP_STACK_INFO
-// #define CMB_USING_DUMP_STACK_INFO    CMB_ENABLE                  // default
-// #define CMB_USING_DUMP_STACK_INFO    CMB_DISABLE
-   #endif
+#  ifndef CMB_USING_DUMP_STACK_INFO
+//#define CMB_USING_DUMP_STACK_INFO     CMB_ENABLE                  // default
+//#define CMB_USING_DUMP_STACK_INFO     CMB_DISABLE
+#  endif
 
 /* language of print information */
-   #ifndef CMB_PRINT_LANGUAGE
-// #define CMB_PRINT_LANGUAGE           CMB_PRINT_LANGUAGE_ENGLISH  // default
-// #define CMB_PRINT_LANGUAGE           CMB_PRINT_LANGUAGE_CHINESE
-   #endif
+#  ifndef CMB_PRINT_LANGUAGE
+//#define CMB_PRINT_LANGUAGE            CMB_PRINT_LANGUAGE_ENGLISH  // default
+//#define CMB_PRINT_LANGUAGE            CMB_PRINT_LANGUAGE_CHINESE
+#  endif
 
 #endif /* _CMB_CFG_H_ */
 
